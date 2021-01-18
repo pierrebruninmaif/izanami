@@ -35,6 +35,15 @@ jobs:
         run: |
           export VERSION=$(echo ${{ github.event.inputs.releaseVersion }} | sed 's/v//')
           echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+      - name: Generate changelog
+        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: load changelog
+        uses: pCYSl5EDgo/cat@master
+        id: changelog
+        with:
+          path: CHANGELOG.md
       - name: Create Release
         id: create-release
         uses: actions/create-release@v1
@@ -45,6 +54,10 @@ jobs:
           release_name: Release ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
+          body: | 
+            Docker : https://hub.docker.com/r/maif/izanami/
+            See the documentation at https://maif.github.io/izanami/
+            ${{ steps.changelog.outputs.text }}
   publish-job:
     runs-on: ubuntu-latest
     strategy:
