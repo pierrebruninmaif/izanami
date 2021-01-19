@@ -62,7 +62,7 @@ jobs:
         id: update_release
         uses: tubone24/update_release@v1.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: ${{ steps.changelog_content.outputs.text }}
           isAppendBody: true
