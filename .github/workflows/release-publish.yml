@@ -58,11 +58,9 @@ jobs:
         id: changelog_content
         with:
           path: changelogs.md
-      - name: update release
-        id: update_release
-        uses: tubone24/update_release@v1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: meeDamian/github-release@2.0
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.changelog_content.outputs.text }}
-          isAppendBody: true
+        env:
+          INPUT_TAG: ${{ env.TAG_NAME }}
