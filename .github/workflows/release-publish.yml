@@ -63,3 +63,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body: ${{ steps.changelog_content.outputs.text }}
           tag: ${{ env.TAG_NAME }}
+          allow_override: true
