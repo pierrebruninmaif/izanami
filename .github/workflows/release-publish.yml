@@ -1,10 +1,7 @@
 name: Release and publish
 on:
-  workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: 'release version (1.0.0, v1.2.0, etc)'
-        required: true
+  milestone:
+    types: [closed]
 
 jobs:
   create-release:
@@ -35,15 +32,16 @@ jobs:
         run: |
           export VERSION=$(echo ${{ github.event.inputs.releaseVersion }} | sed 's/v//')
           echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
-      - name: Generate changelog
-        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: load changelog
-        uses: pCYSl5EDgo/cat@master
+      - name: Create Release Notes
+        uses: docker://decathlon/release-notes-generator-action:2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OUTPUT_FOLDER: temp_release_notes
+          USE_MILESTONE_TITLE: "true"
+      - uses: pCYSl5EDgo/cat@master
         id: changelog
         with:
-          path: CHANGELOG.md
+          path: temp_release_notes/${{ github.event.milestone.title }}.md
       - name: Create Release
         id: create-release
         uses: actions/create-release@v1
