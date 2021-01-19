@@ -32,16 +32,6 @@ jobs:
         run: |
           export VERSION=$(echo ${{ github.event.inputs.releaseVersion }} | sed 's/v//')
           echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
-      - name: Create Release Notes
-        uses: docker://decathlon/release-notes-generator-action:2.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OUTPUT_FOLDER: temp_release_notes
-          USE_MILESTONE_TITLE: "true"
-      - uses: pCYSl5EDgo/cat@master
-        id: changelog
-        with:
-          path: temp_release_notes/${{ github.event.milestone.title }}.md
       - name: Create Release
         id: create-release
         uses: actions/create-release@v1
@@ -55,7 +45,24 @@ jobs:
           body: | 
             Docker : https://hub.docker.com/r/maif/izanami/
             See the documentation at https://maif.github.io/izanami/
-            ${{ steps.changelog.outputs.text }}
+      - name: changelogs
+        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          onlyLastTag: true
+          output: changelogs.md
+      - uses: pCYSl5EDgo/cat@master
+        id: changelog_content
+        with:
+          path: changelogs.md
+      - name: update release
+        id: update_release
+        uses: tubone24/update_release@v1.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          body: ${{ steps.changelog_content.outputs.text }}
+          is_append_body: true
   publish-job:
     runs-on: ubuntu-latest
     strategy:
